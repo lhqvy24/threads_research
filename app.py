@@ -42,9 +42,18 @@ def callback():
         "code": code,
     }
     r = requests.post(TOKEN_URL, data=data, timeout=30)
+    if not r.ok:
+        return f"""
+        <h3>Token exchange failed</h3>
+        <pre>Status: {r.status_code}</pre>
+        <pre>Body: {r.text}</pre>
+        <pre>client_id(last4): {str(APP_ID)[-4:]}</pre>
+        <pre>redirect_uri: {REDIRECT_URI}</pre>
+        """, 400
     r.raise_for_status()
     short_token = r.json()["access_token"]
     user_id = r.json().get("user_id")
+
 
     # bước 3 (khuyên dùng): đổi sang long-lived token để dùng bền hơn
     ex = requests.get(EXCHANGE_URL, params={
